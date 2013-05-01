@@ -24,17 +24,15 @@
             initWithRootViewController:[self demoController]];
 }
 
-- (MFSideMenu *)sideMenu {
-    SideMenuViewController *leftSideMenuController = [[SideMenuViewController alloc] init];
-    SideMenuViewController *rightSideMenuController = [[SideMenuViewController alloc] init];
+- (MFSideMenu *)sideMenuL:(SideMenuViewController *)left R:(SideMenuViewController *)right {
     UINavigationController *navigationController = [self navigationController];
     
     MFSideMenu *sideMenu = [MFSideMenu menuWithNavigationController:navigationController
-                                             leftSideMenuController:leftSideMenuController
-                                            rightSideMenuController:rightSideMenuController];
+                                             leftSideMenuController:left
+                                            rightSideMenuController:right];
     
-    leftSideMenuController.sideMenu = sideMenu;
-    rightSideMenuController.sideMenu = sideMenu;
+    left.sideMenu = sideMenu;
+    right.sideMenu = sideMenu;
     
     return sideMenu;
 }
@@ -43,11 +41,14 @@
 {
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     
+    SideMenuViewController *leftSideMenuController = [[SideMenuViewController alloc] init];
+    SideMenuViewController *rightSideMenuController = [[SideMenuViewController alloc] init];
+    
     NSMutableArray *controllers = [NSMutableArray new];
-    [controllers addObject:[self sideMenu].navigationController];
-    [controllers addObject:[self sideMenu].navigationController];
-    [controllers addObject:[self sideMenu].navigationController];
-    [controllers addObject:[self sideMenu].navigationController];
+    [controllers addObject: [[UINavigationController alloc] initWithRootViewController: [[UIViewController alloc] init]]];
+    [controllers addObject:[self sideMenuL: leftSideMenuController R: rightSideMenuController].navigationController];
+    [controllers addObject:[self sideMenuL: leftSideMenuController R: rightSideMenuController].navigationController];
+    [controllers addObject:[self sideMenuL: leftSideMenuController R: rightSideMenuController].navigationController];
     
     UITabBarController *tabBarController = [[UITabBarController alloc] init];
     [tabBarController setViewControllers:controllers];

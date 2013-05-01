@@ -236,9 +236,20 @@ typedef enum {
        self.menuState != MFSideMenuStateClosed) return YES;
     
     if([gestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]]) {
-        if([gestureRecognizer.view isEqual:self.rootViewController.view] &&
-           [self rootViewControllerPanEnabled]) return YES;
-        
+        if([gestureRecognizer.view isEqual:self.rootViewController.view]) {
+            if ([self rootViewControllerPanEnabled]) {
+                if ([[self rootViewController] isKindOfClass: [UITabBarController class]]) {
+                    UIViewController* vc = [(UITabBarController *)[self rootViewController] selectedViewController];
+                    if ([vc respondsToSelector: @selector(sideMenu)]) {
+                        id sm = [vc performSelector: @selector(sideMenu)];
+                        if (sm) {
+                            return YES;
+                        }
+                    }
+                }
+            }
+            return NO;
+        }
         if([gestureRecognizer.view isEqual:self.menuContainerView] &&
            [self sideMenuPanEnabled]) return YES;
     }
@@ -430,8 +441,10 @@ typedef enum {
                                              initWithTarget:self
                                              action:@selector(navigationControllerTapped:)];
     [tapRecognizer setDelegate:self];
+//    [self.navigationController.view addGestureRecognizer: tapRecognizer];
     [self.rootViewController.view addGestureRecognizer:tapRecognizer];
     
+//    [self.navigationController.view addGestureRecognizer: [self panGestureRecognizer]];
     [self.rootViewController.view addGestureRecognizer:[self panGestureRecognizer]];
     [menuContainerView addGestureRecognizer:[self panGestureRecognizer]];
 }
@@ -655,7 +668,11 @@ typedef enum {
 #pragma mark - Root Controller
 
 - (UIViewController *)rootViewController {
-    return [UIApplication sharedApplication].keyWindow.rootViewController;
+    if (self.navigationController.tabBarController) {
+        return self.navigationController.tabBarController;
+    }
+    return self.navigationController;
+//    return [UIApplication sharedApplication].keyWindow.rootViewController;
 }
 
 - (void) setRootControllerOffset:(CGFloat)xOffset {
